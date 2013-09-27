@@ -2,10 +2,10 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
+import os
 import sqlite3
 from os import path
 
-from scrapy.xlib.pydispatch import dispatcher
 from scrapy import signals, log
 from scrapy.contrib.exporter import JsonLinesItemExporter
 
@@ -27,7 +27,8 @@ class JsonExportPipeline(object):
         return pipeline
 
     def spider_opened(self, spider):
-        file = open('%s.json' % spider.name, 'w+b')
+        json_path = os.path.join('dbs', '%s.json' % spider.name)
+        file = open(json_path, 'w+b')
         self.files[spider] = file
         self.exporter = JsonLinesItemExporter(file)
         self.exporter.start_exporting()
@@ -44,12 +45,17 @@ class JsonExportPipeline(object):
 
 
 class SQLiteStorePipeline(object):
-    filename = 'data.sqlite'
-
     def __init__(self):
         self.conn = None
-        dispatcher.connect(self.initialize, signals.engine_started)
-        dispatcher.connect(self.finalize, signals.engine_stopped)
+        self.filename = 'data.sqlite'
+        self.database = os.path.join('dbs', self.filename)
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        pipeline = cls()
+        crawler.signals.connect(pipeline.initialize, signals.spider_opened)
+        crawler.signals.connect(pipeline.finalize, signals.spider_closed)
+        return pipeline
 
     def process_item(self, item, domain):
         try:
@@ -60,10 +66,10 @@ class SQLiteStorePipeline(object):
         return item
 
     def initialize(self):
-        if path.exists(self.filename):
-            self.conn = sqlite3.connect(self.filename)
+        if path.exists(self.database):
+            self.conn = sqlite3.connect(self.database)
         else:
-            self.conn = self.create_table(self.filename)
+            self.conn = self.create_table()
 
     def finalize(self):
         if self.conn is not None:
@@ -71,8 +77,8 @@ class SQLiteStorePipeline(object):
             self.conn.close()
             self.conn = None
 
-    def create_table(self, filename):
-        conn = sqlite3.connect(filename)
+    def create_table(self):
+        conn = sqlite3.connect(self.database)
         conn.execute("""create table folhainvest
                      (symbol text primary key, name text, domain text)""")
         conn.commit()
