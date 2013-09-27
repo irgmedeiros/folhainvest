@@ -27,7 +27,7 @@ class JsonExportPipeline(object):
         return pipeline
 
     def spider_opened(self, spider):
-        json_path = os.path.join('dbs', '%s.json' % spider.name)
+        json_path = os.path.join('data', '%s.json' % spider.name)
         file = open(json_path, 'w+b')
         self.files[spider] = file
         self.exporter = JsonLinesItemExporter(file)
