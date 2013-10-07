@@ -2,6 +2,7 @@
 import mechanize
 import cookielib
 
+
 class BaseBroker(object):
     portifolio = None
     cookies = dict()
@@ -21,7 +22,6 @@ class BaseBroker(object):
         Return
         """
         raise NotImplementedError
-
 
     def buy(self, symbol, shares, price):
         """
