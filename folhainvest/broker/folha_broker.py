@@ -6,7 +6,7 @@ import mechanize
 import cookielib
 
 
-class FolhaBroker(object):
+class FolhaBroker(BaseBroker):
     def __init__(self):
         self.browser = None
         locale.setlocale(locale.LC_ALL, ('pt_BR', 'UTF-8')) #TODO move to the right place
