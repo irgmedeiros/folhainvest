@@ -7,8 +7,8 @@
 #
 
 BOT_NAME = 'folhainvest'
-FOLHA_USER = ''
-FOLHA_PASS = ''
+FOLHA_USER = 'irgmedeiros@gmail.com'
+FOLHA_PASS = 'folha01'
 
 ITEM_PIPELINES = {
     'folhainvest.pipelines.JsonExportPipeline': 800,

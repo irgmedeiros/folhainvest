@@ -1,5 +1,6 @@
 # coding: utf-8
 import hashlib
+from scrapy import log
 from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
 from scrapy.http import FormRequest, Request
@@ -15,9 +16,9 @@ class Finvest_spider(CrawlSpider):
     login_page = \
         "http://login.folha.com.br/login?done=http%3A%2F%2Ffolhainvest.folha.com.br%2Fcarteira&service=folhainvest"
     start_urls = [
-        "http://login.folha.com.br/login?done=http%3A%2F%2Ffolhainvest.folha.com.br%2Fcarteira&service=folhainvest",
-        # "http://folhainvest.folha.com.br/",
-        # "http://folhainvest.folha.com.br/carteira",
+        #"http://login.folha.com.br/login?done=http%3A%2F%2Ffolhainvest.folha.com.br%2Fcarteira&service=folhainvest",
+        #"http://folhainvest.folha.com.br/",
+        "http://folhainvest.folha.com.br/carteira",
     ]
     extra_domain_names = ["folhainvest", "folha"]
 
@@ -68,7 +69,7 @@ class Finvest_spider(CrawlSpider):
             yield Request(url='http://folhainvest.folha.com.br/carteira', callback=self.parse_portifolio,
                           dont_filter=True)
         else:
-            self.log("\n\nBad times :(\n\n")
+            self.log("\nLogin failed\n", level=log.ERROR)
             # Something went wrong, we couldn't log in, so nothing happens.
 
     def parse_portifolio(self, response):

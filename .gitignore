@@ -41,3 +41,5 @@ nosetests.xml
 
 data/
 dbs/
+.gitignore
+settings.py
