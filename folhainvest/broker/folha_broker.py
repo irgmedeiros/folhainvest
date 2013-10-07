@@ -9,10 +9,31 @@ import cookielib
 class FolhaBroker(object):
     def __init__(self):
         self.browser = None
+        locale.setlocale(locale.LC_ALL, ('pt_BR', 'UTF-8')) #TODO move to the right place
 
     @login_check
     def buy(self, symbol, shares, price):
-        pass
+        url = str.format('http://folhainvest.folha.com.br/comprar')
+        br = self.browser
+        br.open(url)
+        br.select_form(nr=0)
+        if price:
+            #transation with fixed price
+            br.form['pricing'] = ['fixed']
+            br.form['value'] = locale.format("%.2f", price)
+        else:
+            #transation with market price
+            br.form['pricing'] = ['market']
+        br.form['company'] = [str(symbol)]  #TODO: check if symbol is valid to avoid exception here
+        br.form['quantity'] = str(shares)
+        br.submit()
+
+        req = mechanize.Request('http://folhainvest.folha.com.br/confirmar', r'confirm.x=52&confirm.y=15')
+        br.open(req)
+
+        if 'Ordem cancelada' in br.response().read():
+            # TODO: show error message
+            print('Ordem cancelada')
 
     @login_check
     def sell(self, symbol, shares, price=None):
@@ -30,8 +51,6 @@ class FolhaBroker(object):
         br.form['company'] = [str(symbol)]  #TODO: check if symbol is valid to avoid exception here
         br.form['quantity'] = str(shares)
         br.submit()
-
-        locale.setlocale(locale.LC_ALL, ('pt_BR', 'UTF-8')) #TODO move to the right place
 
         req = mechanize.Request('http://folhainvest.folha.com.br/confirmar', r'confirm.x=34&confirm.y=9')
         br.open(req)
